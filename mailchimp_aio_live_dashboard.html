@@ -122,7 +122,7 @@ function dc(id){if(CH[id]){CH[id].destroy();delete CH[id];}}
 function bo(yMax){return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#0F1729',borderColor:'rgba(255,255,255,0.15)',borderWidth:1,titleColor:'#94A3B8',bodyColor:'#E2E8F0',padding:10,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y.toFixed(1)+'%'}}},scales:{x:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'#64748B',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'#64748B',font:{size:11},callback:v=>v+'%'},min:0,...(yMax?{max:yMax}:{})}}}}
 function ld(label,data,color,dash){return{label,data,borderColor:color,backgroundColor:color+'18',borderWidth:2.5,pointRadius:5,pointBackgroundColor:color,pointBorderColor:C.bg,pointBorderWidth:2,tension:0.3,fill:false,...(dash?{borderDash:dash}:{})}}
 function ad(label,data,color){return{label,data,borderColor:color,backgroundColor:color+'18',borderWidth:2.5,pointRadius:5,pointBackgroundColor:color,pointBorderColor:C.bg,pointBorderWidth:2,tension:0.3,fill:true}}
-function fmt(d){if(!d)return'';const dt=new Date(d+'T00:00:00Z');return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'});}
+function fmt(d){if(!d)return'';try{const s=d instanceof Date?d.toISOString().slice(0,10):(typeof d==='string'?d:String(d));const dt=new Date(s+'T00:00:00Z');if(isNaN(dt))return String(d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'});}catch(e){return String(d);}}
 function g(r,k){return parseFloat(r[k])||0;}
 async function loadData(){
   document.getElementById('loading').style.display='flex';
@@ -134,7 +134,7 @@ async function loadData(){
       const txt=await res.text();
       const json=JSON.parse(txt.replace(/^[^\(]+\(/,'').replace(/\);?\s*$/,''));
       const cols=json.table.cols.map(c=>c.label);
-      const all=json.table.rows.filter(r=>r&&r.c&&r.c[0]&&r.c[0].v).map(row=>{const o={};cols.forEach((c,i)=>{const cell=row.c[i];o[c]=cell?(cell.v!=null?cell.v:''):'';});return o;});
+      const all=json.table.rows.filter(r=>r&&r.c&&r.c[0]&&r.c[0].v).map(row=>{const o={};cols.forEach((c,i)=>{const cell=row.c[i];if(!cell||cell.v==null){o[c]='';return;}const v=cell.v;if(typeof v==='string'&&v.match(/^Date\((\d+),(\d+),(\d+)\)$/)){const m=v.match(/^Date\((\d+),(\d+),(\d+)\)$/);o[c]=m[1]+'-'+String(parseInt(m[2])+1).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0');}else{o[c]=v;}});return o;});
       const act=all.filter(r=>parseFloat(r.aio_presence_rate)>0);
       if(act.length>0){rows=act;live=true;}
     }
