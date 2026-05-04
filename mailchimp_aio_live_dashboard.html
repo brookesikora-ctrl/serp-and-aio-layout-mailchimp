@@ -40,7 +40,7 @@ h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#F8
 .stitle .bar{width:4px;height:22px;border-radius:2px;}
 .stitle span{font-size:14px;font-weight:700;color:#CBD5E1;letter-spacing:0.04em;text-transform:uppercase;}
 .cdesc{font-size:12px;color:var(--mut);margin-bottom:16px;line-height:1.6;}
-.cw{position:relative;height:300px;}.cw.sm{height:240px;}.cw.lg{height:340px;}
+.cw{position:relative;height:300px;}.cw.sm{height:240px;}.cw.lg{height:340px;}.cw.xl{height:420px;}
 .tcol{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .leg{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;}
 .li{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mut);}
@@ -61,7 +61,30 @@ h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#F8
 .chip{background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;}
 .chl{font-size:11px;color:var(--mut);}.chv{font-size:15px;font-weight:700;margin-top:2px;}
 .ftr{margin-top:32px;padding-top:16px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;font-size:11px;color:var(--mut);flex-wrap:wrap;gap:8px;}
-@media(max-width:640px){body{padding:16px;}.tcol{grid-template-columns:1fr;}h1{font-size:18px;}}
+/* ngram table */
+.ng-controls{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.ng-btn{background:rgba(255,255,255,0.04);border:1px solid var(--bdr);color:var(--mut);border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.ng-btn.active{background:rgba(192,132,252,0.15);border-color:var(--aio);color:var(--aio);}
+.ng-select{background:var(--card);border:1px solid var(--bdr);color:var(--txt);border-radius:8px;padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;}
+.ng-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.ng-tbl th{text-align:left;padding:8px 10px;color:var(--mut);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:var(--card);cursor:pointer;user-select:none;}
+.ng-tbl th:hover{color:#CBD5E1;}
+.ng-tbl th .sort-arrow{margin-left:4px;opacity:0.4;}
+.ng-tbl th.sorted .sort-arrow{opacity:1;color:var(--aio);}
+.ng-tbl td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--txt);}
+.ng-tbl tr:hover td{background:rgba(255,255,255,0.02);}
+.ng-tbl td.kw{font-weight:600;color:#CBD5E1;max-width:220px;}
+.ng-tbl td.num{font-variant-numeric:tabular-nums;text-align:right;}
+.ng-tbl td.good{color:#4ADE80;}
+.ng-tbl td.warn{color:#F87171;}
+.ng-tbl td.na{color:var(--mut);font-size:10px;}
+.ng-pill{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;margin-left:4px;}
+.ng-pill.one{background:rgba(56,189,248,0.15);color:#38BDF8;}
+.ng-pill.two{background:rgba(192,132,252,0.15);color:#C084FC;}
+.tbl-wrap{overflow-x:auto;max-height:500px;overflow-y:auto;border-radius:10px;border:1px solid var(--bdr);}
+.ng-search{background:var(--card);border:1px solid var(--bdr);color:var(--txt);border-radius:8px;padding:6px 12px;font-size:12px;font-family:'DM Sans',sans-serif;width:220px;}
+.ng-search::placeholder{color:var(--mut);}
+@media(max-width:640px){body{padding:16px;}.tcol{grid-template-columns:1fr;}h1{font-size:18px;}.ng-tbl td,.ng-tbl th{padding:5px 6px;}}
 </style>
 </head>
 <body>
@@ -84,24 +107,35 @@ h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#F8
     <button class="tab" onclick="st('mailchimp',this)">Mailchimp Rankings</button>
     <button class="tab" onclick="st('competitors',this)">Competitor AIO Share</button>
     <button class="tab" onclick="st('ads',this)">Ads vs AIO</button>
+    <button class="tab" onclick="st('ngram',this)">Keyword N-gram</button>
   </div>
+
+  <!-- OVERVIEW -->
   <div id="panel-overview" class="panel active">
     <div class="kgrid" id="kgrid"></div>
     <div class="cc"><div class="stitle"><div class="bar" style="background:var(--mc)"></div><span>Mailchimp Channel Citation Rate Over Time</span></div><div class="cw"><canvas id="c1"></canvas></div><div class="leg"><div class="li"><div class="ld" style="background:var(--aio)"></div>AIO Citations</div><div class="li"><div class="ld" style="background:var(--org)"></div>Organic</div><div class="li"><div class="ld" style="background:var(--ads)"></div>Paid Ads</div></div></div>
     <div class="cc"><div class="stitle"><div class="bar" style="background:var(--ads)"></div><span>Ads Presence Around AIO</span></div><div class="cw sm"><canvas id="c2"></canvas></div><div class="leg"><div class="li"><div class="ld" style="background:var(--ads)"></div>Any Ads Showing</div><div class="li"><div class="ld" style="background:var(--dan)"></div>Ads Above AIO</div></div></div>
   </div>
+
+  <!-- AIO -->
   <div id="panel-aio" class="panel">
     <div class="cc"><div class="stitle"><div class="bar" style="background:var(--aio)"></div><span>AIO Presence Rate Over Time</span></div><p class="cdesc">How frequently Google shows an AI Overview box across all tracked keywords.</p><div class="cw lg"><canvas id="c3"></canvas></div></div>
     <div class="cc"><div class="stitle"><div class="bar" style="background:var(--ads)"></div><span>Ads Competing with AIO Over Time</span></div><p class="cdesc">Ads appearing above the AI Overview capture user attention first.</p><div class="cw"><canvas id="c4"></canvas></div><div class="leg"><div class="li"><div class="ld" style="background:var(--ads)"></div>Any Ads Showing</div><div class="li"><div class="ld" style="background:var(--dan)"></div>Ads Above AIO</div></div></div>
   </div>
+
+  <!-- MAILCHIMP -->
   <div id="panel-mailchimp" class="panel">
     <div class="cc"><div class="stitle"><div class="bar" style="background:var(--mc)"></div><span>Mailchimp Citation Rate by Channel</span></div><p class="cdesc">% of all tracked keywords where Mailchimp appears in each channel.</p><div class="cw lg"><canvas id="c5"></canvas></div><div class="leg"><div class="li"><div class="ld" style="background:var(--aio)"></div>AIO Citations</div><div class="li"><div class="ld" style="background:var(--org)"></div>Organic</div><div class="li"><div class="ld" style="background:var(--ads)"></div>Paid Ads</div></div></div>
     <div class="cc"><div class="stitle"><div class="bar" style="background:var(--org)"></div><span>Mailchimp Average Position by Channel</span></div><p class="cdesc">Average ranking position when Mailchimp appears. Lower = better.</p><div class="cw lg"><canvas id="c6"></canvas></div><div class="leg"><div class="li"><div class="ld" style="background:var(--aio)"></div>AIO Avg Rank</div><div class="li"><div class="ld" style="background:var(--org)"></div>Organic Avg Rank</div></div><div class="ins" id="rins"></div></div>
   </div>
+
+  <!-- COMPETITORS -->
   <div id="panel-competitors" class="panel">
     <div class="cc"><div class="stitle"><div class="bar" style="background:var(--brevo)"></div><span>AIO Citation Share — Mailchimp vs Competitors</span></div><p class="cdesc">% of tracked keywords where each brand is cited inside the AI Overview.</p><div class="cw lg"><canvas id="c7"></canvas></div><div class="leg"><div class="li"><div class="ld" style="background:var(--mc)"></div>Mailchimp</div><div class="li"><div class="ld" style="background:var(--brevo)"></div>Brevo</div><div class="li"><div class="ld" style="background:var(--ml)"></div>MailerLite</div><div class="li"><div class="ld" style="background:var(--kl)"></div>Klaviyo</div><div class="li"><div class="ld" style="background:var(--om)"></div>Omnisend</div><div class="li"><div class="ld" style="background:var(--ac)"></div>ActiveCampaign</div><div class="li"><div class="ld" style="background:var(--hs)"></div>HubSpot</div><div class="li"><div class="ld" style="background:var(--cc)"></div>Constant Contact</div></div></div>
     <div class="cc"><div class="stitle"><div class="bar" style="background:var(--mc)"></div><span>Latest Snapshot</span></div><div class="cw"><canvas id="c8"></canvas></div><div class="chips" id="chips"></div></div>
   </div>
+
+  <!-- ADS -->
   <div id="panel-ads" class="panel">
     <div class="cc"><div class="stitle"><div class="bar" style="background:var(--ads)"></div><span>Ads Appearing Above AIO — % of Keywords</span></div><p class="cdesc">When ads appear above the AI Overview, they capture user attention before the AIO box.</p><div class="cw lg"><canvas id="c9"></canvas></div><div class="leg"><div class="li"><div class="ld" style="background:var(--ads)"></div>Any Ads Showing</div><div class="li"><div class="ld" style="background:var(--dan)"></div>Ads Above AIO</div></div></div>
     <div class="tcol">
@@ -109,12 +143,72 @@ h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#F8
       <div class="cc" style="margin-bottom:0"><div class="stitle"><div class="bar" style="background:var(--ads)"></div><span>SERP Landscape Summary</span></div><div class="stbl" id="serp"></div></div>
     </div>
   </div>
+
+  <!-- NGRAM -->
+  <div id="panel-ngram" class="panel">
+    <div class="cc">
+      <div class="stitle"><div class="bar" style="background:var(--org)"></div><span>Keyword Performance by N-gram</span></div>
+      <p class="cdesc">Aggregated metrics for each keyword grouped by 1-gram (single word) and 2-gram (two words). Based on the most recent scan date. Click any column header to sort.</p>
+      <div class="ng-controls">
+        <button class="ng-btn active" id="ng-all" onclick="ngFilter('all',this)">All</button>
+        <button class="ng-btn" id="ng-1" onclick="ngFilter('1',this)">1-gram</button>
+        <button class="ng-btn" id="ng-2" onclick="ngFilter('2',this)">2-gram</button>
+        <select class="ng-select" id="ng-date-sel" onchange="ngRender()">
+          <option value="latest">Latest date</option>
+        </select>
+        <input class="ng-search" id="ng-search" placeholder="Search keywords..." oninput="ngRender()">
+        <span style="font-size:11px;color:var(--mut);margin-left:auto" id="ng-count"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="ng-tbl" id="ng-tbl">
+          <thead>
+            <tr>
+              <th onclick="ngSort('keyword')" id="th-keyword">Keyword <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('n')" id="th-n">N <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('aio_showing')" id="th-aio_showing">AIO Showing <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('mc_aio_rate')" id="th-mc_aio_rate" class="sorted">MC AIO % <span class="sort-arrow">↓</span></th>
+              <th onclick="ngSort('mc_aio_rank')" id="th-mc_aio_rank">MC AIO Rank <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('mc_organic_rate')" id="th-mc_organic_rate">MC Organic % <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('mc_organic_rank')" id="th-mc_organic_rank">MC Org Rank <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('mc_ads_rate')" id="th-mc_ads_rate">MC Ads % <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('brevo_aio_rate')" id="th-brevo_aio_rate">Brevo AIO % <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('klaviyo_aio_rate')" id="th-klaviyo_aio_rate">Klaviyo AIO % <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('mailerlite_aio_rate')" id="th-mailerlite_aio_rate">MailerLite % <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('omnisend_aio_rate')" id="th-omnisend_aio_rate">Omnisend % <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('ads_above_aio')" id="th-ads_above_aio">Ads Above AIO <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('top_organic_1')" id="th-top_organic_1">Top Organic #1 <span class="sort-arrow">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="ng-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- N-gram summary cards -->
+    <div class="tcol" style="margin-top:0">
+      <div class="cc" style="margin-bottom:0">
+        <div class="stitle"><div class="bar" style="background:var(--org)"></div><span>1-gram vs 2-gram — AIO Citation Rate</span></div>
+        <p class="cdesc">How Mailchimp's AIO presence compares across single-word vs two-word keywords.</p>
+        <div class="cw"><canvas id="c10"></canvas></div>
+      </div>
+      <div class="cc" style="margin-bottom:0">
+        <div class="stitle"><div class="bar" style="background:var(--aio)"></div><span>Competitor AIO by N-gram (Latest)</span></div>
+        <p class="cdesc">Average AIO citation rate per competitor broken down by ngram type.</p>
+        <div class="cw"><canvas id="c11"></canvas></div>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="ftr"><span id="fl">Data: Mailchimp AIO Tool · Live from Google Sheets</span><span id="fr">Only active scan dates shown</span></div>
 
 <script>
-const SID='1aLqZah8Frx8uVhvu3q55cCFfxUz6ZV7H8jlcKRlDFp0',GID='1479179188';
+const SID='1aLqZah8Frx8uVhvu3q55cCFfxUz6ZV7H8jlcKRlDFp0';
+const GID_SUMMARY='1479179188';
+const GID_NGRAM='1189851907';
+
+// Fallback summary data
 const FB=[{"run_date":"2026-02-24","total":2182,"aio_presence_rate":55.5,"any_ads_rate":41.02,"ads_above_aio_rate":16.45,"mailchimp_aio_rate":24.66,"mailchimp_organic_rate":20.62,"mailchimp_ad_rate":16.87,"mailchimp_avg_aio_rank":3.3,"mailchimp_avg_organic_rank":2.14,"brevo_aio_rate":17.97,"klaviyo_aio_rate":12.56,"hubspot_aio_rate":8.11,"mailerlite_aio_rate":14.99,"activecampaign_aio_rate":7.06,"constantcontact_aio_rate":5.59,"omnisend_aio_rate":12.1},{"run_date":"2026-02-25","total":1627,"aio_presence_rate":37.06,"any_ads_rate":28.7,"ads_above_aio_rate":11.74,"mailchimp_aio_rate":17.76,"mailchimp_organic_rate":14.07,"mailchimp_ad_rate":15.3,"mailchimp_avg_aio_rank":3.33,"mailchimp_avg_organic_rank":2.18,"brevo_aio_rate":13.03,"klaviyo_aio_rate":8.54,"hubspot_aio_rate":4.79,"mailerlite_aio_rate":10.33,"activecampaign_aio_rate":5.29,"constantcontact_aio_rate":3.87,"omnisend_aio_rate":7.13},{"run_date":"2026-03-06","total":1641,"aio_presence_rate":41.32,"any_ads_rate":33.27,"ads_above_aio_rate":18.04,"mailchimp_aio_rate":20.6,"mailchimp_organic_rate":10.73,"mailchimp_ad_rate":9.14,"mailchimp_avg_aio_rank":3.33,"mailchimp_avg_organic_rank":2.13,"brevo_aio_rate":15.17,"klaviyo_aio_rate":11.27,"hubspot_aio_rate":6.58,"mailerlite_aio_rate":10.42,"activecampaign_aio_rate":4.94,"constantcontact_aio_rate":3.47,"omnisend_aio_rate":6.22},{"run_date":"2026-03-07","total":1093,"aio_presence_rate":60.66,"any_ads_rate":39.34,"ads_above_aio_rate":17.84,"mailchimp_aio_rate":31.11,"mailchimp_organic_rate":16.19,"mailchimp_ad_rate":11.07,"mailchimp_avg_aio_rank":3.2,"mailchimp_avg_organic_rank":2.16,"brevo_aio_rate":22.96,"klaviyo_aio_rate":16.93,"hubspot_aio_rate":8.87,"mailerlite_aio_rate":15.74,"activecampaign_aio_rate":7.96,"constantcontact_aio_rate":6.95,"omnisend_aio_rate":7.87},{"run_date":"2026-03-17","total":547,"aio_presence_rate":60.88,"any_ads_rate":46.07,"ads_above_aio_rate":19.38,"mailchimp_aio_rate":26.51,"mailchimp_organic_rate":17.92,"mailchimp_ad_rate":10.05,"mailchimp_avg_aio_rank":3.27,"mailchimp_avg_organic_rank":1.98,"brevo_aio_rate":19.93,"klaviyo_aio_rate":17.0,"hubspot_aio_rate":10.79,"mailerlite_aio_rate":16.45,"activecampaign_aio_rate":8.23,"constantcontact_aio_rate":5.48,"omnisend_aio_rate":9.69},{"run_date":"2026-03-18","total":523,"aio_presence_rate":58.89,"any_ads_rate":40.73,"ads_above_aio_rate":13.0,"mailchimp_aio_rate":20.84,"mailchimp_organic_rate":16.44,"mailchimp_ad_rate":7.84,"mailchimp_avg_aio_rank":3.17,"mailchimp_avg_organic_rank":2.01,"brevo_aio_rate":19.69,"klaviyo_aio_rate":13.58,"hubspot_aio_rate":8.41,"mailerlite_aio_rate":15.87,"activecampaign_aio_rate":6.5,"constantcontact_aio_rate":5.16,"omnisend_aio_rate":9.18},{"run_date":"2026-03-25","total":546,"aio_presence_rate":57.33,"any_ads_rate":28.21,"ads_above_aio_rate":4.95,"mailchimp_aio_rate":22.89,"mailchimp_organic_rate":17.58,"mailchimp_ad_rate":7.88,"mailchimp_avg_aio_rank":3.62,"mailchimp_avg_organic_rank":2.05,"brevo_aio_rate":19.96,"klaviyo_aio_rate":14.47,"hubspot_aio_rate":9.52,"mailerlite_aio_rate":16.67,"activecampaign_aio_rate":8.24,"constantcontact_aio_rate":3.66,"omnisend_aio_rate":8.79},{"run_date":"2026-04-01","total":519,"aio_presence_rate":54.53,"any_ads_rate":29.48,"ads_above_aio_rate":8.09,"mailchimp_aio_rate":22.54,"mailchimp_organic_rate":20.42,"mailchimp_ad_rate":5.39,"mailchimp_avg_aio_rank":3.38,"mailchimp_avg_organic_rank":2.19,"brevo_aio_rate":16.57,"klaviyo_aio_rate":11.37,"hubspot_aio_rate":6.74,"mailerlite_aio_rate":14.07,"activecampaign_aio_rate":9.44,"constantcontact_aio_rate":3.66,"omnisend_aio_rate":5.78},{"run_date":"2026-04-08","total":499,"aio_presence_rate":54.71,"any_ads_rate":38.28,"ads_above_aio_rate":14.43,"mailchimp_aio_rate":24.05,"mailchimp_organic_rate":17.84,"mailchimp_ad_rate":8.22,"mailchimp_avg_aio_rank":2.68,"mailchimp_avg_organic_rank":2.13,"brevo_aio_rate":16.43,"klaviyo_aio_rate":13.43,"hubspot_aio_rate":7.41,"mailerlite_aio_rate":14.23,"activecampaign_aio_rate":6.81,"constantcontact_aio_rate":5.01,"omnisend_aio_rate":9.82},{"run_date":"2026-04-15","total":547,"aio_presence_rate":55.76,"any_ads_rate":20.29,"ads_above_aio_rate":4.2,"mailchimp_aio_rate":23.03,"mailchimp_organic_rate":20.29,"mailchimp_ad_rate":3.47,"mailchimp_avg_aio_rank":2.53,"mailchimp_avg_organic_rank":2.21,"brevo_aio_rate":18.65,"klaviyo_aio_rate":12.98,"hubspot_aio_rate":6.95,"mailerlite_aio_rate":15.17,"activecampaign_aio_rate":8.04,"constantcontact_aio_rate":2.93,"omnisend_aio_rate":9.87},{"run_date":"2026-04-22","total":547,"aio_presence_rate":56.86,"any_ads_rate":30.35,"ads_above_aio_rate":5.67,"mailchimp_aio_rate":25.59,"mailchimp_organic_rate":21.02,"mailchimp_ad_rate":4.39,"mailchimp_avg_aio_rank":2.68,"mailchimp_avg_organic_rank":2.15,"brevo_aio_rate":18.28,"klaviyo_aio_rate":16.82,"hubspot_aio_rate":8.41,"mailerlite_aio_rate":15.9,"activecampaign_aio_rate":7.68,"constantcontact_aio_rate":3.84,"omnisend_aio_rate":13.16}];
+
 const C={mc:'#FFE01B',brevo:'#0B996E',ml:'#09C269',kl:'#A78BFA',hs:'#FF7A59',ac:'#356AE6',om:'#43E198',cc:'#1B72BE',aio:'#C084FC',org:'#38BDF8',ads:'#FB923C',dan:'#F43F5E',mut:'#64748B',bg:'#0A0F1E'};
 Chart.defaults.color='#64748B';Chart.defaults.borderColor='rgba(255,255,255,0.06)';Chart.defaults.font.family="'DM Sans',sans-serif";
 const CH={};
@@ -122,25 +216,166 @@ function dc(id){if(CH[id]){CH[id].destroy();delete CH[id];}}
 function bo(yMax){return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#0F1729',borderColor:'rgba(255,255,255,0.15)',borderWidth:1,titleColor:'#94A3B8',bodyColor:'#E2E8F0',padding:10,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y.toFixed(1)+'%'}}},scales:{x:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'#64748B',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'#64748B',font:{size:11},callback:v=>v+'%'},min:0,...(yMax?{max:yMax}:{})}}}}
 function ld(label,data,color,dash){return{label,data,borderColor:color,backgroundColor:color+'18',borderWidth:2.5,pointRadius:5,pointBackgroundColor:color,pointBorderColor:C.bg,pointBorderWidth:2,tension:0.3,fill:false,...(dash?{borderDash:dash}:{})}}
 function ad(label,data,color){return{label,data,borderColor:color,backgroundColor:color+'18',borderWidth:2.5,pointRadius:5,pointBackgroundColor:color,pointBorderColor:C.bg,pointBorderWidth:2,tension:0.3,fill:true}}
-function fmt(d){if(!d)return'';try{const s=d instanceof Date?d.toISOString().slice(0,10):(typeof d==='string'?d:String(d));const dt=new Date(s+'T00:00:00Z');if(isNaN(dt))return String(d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'});}catch(e){return String(d);}}
+function fmt(d){if(!d)return'';try{const s=d instanceof Date?d.toISOString().slice(0,10):(typeof d==='string'&&d.match(/^Date\((\d+),(\d+),(\d+)\)$/))?((m=>m[1]+'-'+String(parseInt(m[2])+1).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0'))(d.match(/^Date\((\d+),(\d+),(\d+)\)$/))):(typeof d==='string'?d:String(d));const dt=new Date(s+'T00:00:00Z');if(isNaN(dt))return String(d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'});}catch(e){return String(d);}}
+function fmtDate(d){if(!d)return'';try{const s=d instanceof Date?d.toISOString().slice(0,10):(typeof d==='string'&&d.match(/^Date\((\d+),(\d+),(\d+)\)$/))?((m=>m[1]+'-'+String(parseInt(m[2])+1).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0'))(d.match(/^Date\((\d+),(\d+),(\d+)\)$/))):(typeof d==='string'?d:String(d));return s;}catch(e){return String(d);}}
 function g(r,k){return parseFloat(r[k])||0;}
+
+// ── GVIZ FETCH ───────────────────────────────────────────────
+async function fetchGviz(gid){
+  const url='https://docs.google.com/spreadsheets/d/'+SID+'/gviz/tq?tqx=out:json&gid='+gid;
+  const res=await fetch(url);
+  if(!res.ok)throw new Error('fetch failed');
+  const txt=await res.text();
+  const json=JSON.parse(txt.replace(/^[^\(]+\(/,'').replace(/\);?\s*$/,''));
+  const cols=json.table.cols.map(c=>c.label);
+  return json.table.rows.filter(r=>r&&r.c&&r.c[0]&&r.c[0].v).map(row=>{
+    const o={};
+    cols.forEach((col,i)=>{
+      const cell=row.c[i];
+      if(!cell||cell.v==null){o[col]='';return;}
+      let v=cell.v;
+      if(typeof v==='string'&&v.match(/^Date\((\d+),(\d+),(\d+)\)$/)){
+        const m=v.match(/^Date\((\d+),(\d+),(\d+)\)$/);
+        v=m[1]+'-'+String(parseInt(m[2])+1).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0');
+      }
+      o[col]=v;
+    });
+    return o;
+  });
+}
+
+// ── NGRAM STATE ──────────────────────────────────────────────
+let ngData=[], ngFilter_='all', ngSortKey='mc_aio_rate', ngSortDir=-1;
+
+function buildNgram(ngramRows){
+  return ngramRows.filter(r=>r.keyword&&(parseInt(r.ngram)===1||parseInt(r.ngram)===2)).map(r=>({
+    keyword:String(r.keyword),
+    n:parseInt(r.ngram)||1,
+    aio_showing:parseFloat(r.aio_showing_rate)||0,
+    mc_aio_rate:parseFloat(r.mc_aio_rate)||0,
+    mc_aio_rank:parseFloat(r.mc_aio_avg_rank)||null,
+    mc_organic_rate:parseFloat(r.mc_organic_rate)||0,
+    mc_organic_rank:parseFloat(r.mc_organic_avg_rank)||null,
+    mc_ads_rate:parseFloat(r.mc_ads_rate)||0,
+    brevo_aio_rate:parseFloat(r.brevo_aio_rate)||0,
+    klaviyo_aio_rate:parseFloat(r.klaviyo_aio_rate)||0,
+    mailerlite_aio_rate:parseFloat(r.mailerlite_aio_rate)||0,
+    omnisend_aio_rate:parseFloat(r.omnisend_aio_rate)||0,
+    ads_above_aio:parseFloat(r.ads_above_aio_rate)||0,
+    top_organic_1:String(r.top_organic_1||''),
+    scans:parseInt(r.scans)||0,
+  }));
+}
+
+function ngFilter(f,el){
+  ngFilter_=f;
+  document.querySelectorAll('.ng-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  ngRender();
+}
+
+function ngSort(key){
+  if(ngSortKey===key){ngSortDir*=-1;}else{ngSortKey=key;ngSortDir=-1;}
+  document.querySelectorAll('.ng-tbl th').forEach(th=>{
+    th.classList.remove('sorted');
+    th.querySelector('.sort-arrow').textContent='↕';
+  });
+  const th=document.getElementById('th-'+key);
+  if(th){th.classList.add('sorted');th.querySelector('.sort-arrow').textContent=ngSortDir===-1?'↓':'↑';}
+  ngRender();
+}
+
+function ngRender(){
+  if(!ngData.length)return;
+  const search=(document.getElementById('ng-search').value||'').toLowerCase();
+  let rows=ngData.filter(r=>{
+    if(ngFilter_==='1'&&r.n!==1)return false;
+    if(ngFilter_==='2'&&r.n!==2)return false;
+    if(search&&!r.keyword.includes(search))return false;
+    return true;
+  });
+  rows.sort((a,b)=>{
+    const av=a[ngSortKey],bv=b[ngSortKey];
+    if(av===null&&bv===null)return 0;
+    if(av===null)return 1;
+    if(bv===null)return -1;
+    if(typeof av==='string')return av.localeCompare(bv)*ngSortDir;
+    return(av-bv)*ngSortDir;
+  });
+  document.getElementById('ng-count').textContent=rows.length+' keywords';
+  const pct=v=>v==null?'<td class="num na">—</td>':'<td class="num '+(v>=50?'good':v>0?'':'na')+'">'+v.toFixed(1)+'%</td>';
+  const rank=v=>v==null?'<td class="num na">—</td>':'<td class="num">#'+v.toFixed(2)+'</td>';
+  document.getElementById('ng-tbody').innerHTML=rows.map(r=>`
+    <tr>
+      <td class="kw">${r.keyword}<span class="ng-pill ${r.n===1?'one':'two'}">${r.n}-gram</span></td>
+      <td class="num">${r.n}</td>
+      ${pct(r.aio_showing)}
+      ${pct(r.mc_aio_rate)}
+      ${rank(r.mc_aio_rank)}
+      ${pct(r.mc_organic_rate)}
+      ${rank(r.mc_organic_rank)}
+      ${pct(r.mc_ads_rate)}
+      ${pct(r.brevo_aio_rate)}
+      ${pct(r.klaviyo_aio_rate)}
+      ${pct(r.mailerlite_aio_rate)}
+      ${pct(r.omnisend_aio_rate)}
+      ${pct(r.ads_above_aio)}
+      <td class="kw" style="font-size:11px;color:var(--mut)">${r.top_organic_1||'—'}</td>
+    </tr>`).join('');
+
+  // Summary charts
+  const ones=ngData.filter(r=>r.n===1);
+  const twos=ngData.filter(r=>r.n===2);
+  const avg=(arr,k)=>arr.length?parseFloat((arr.reduce((s,r)=>s+(r[k]||0),0)/arr.length).toFixed(1)):0;
+
+  dc('c10');CH.c10=new Chart(document.getElementById('c10'),{
+    type:'bar',
+    data:{labels:['1-gram','2-gram'],datasets:[
+      {label:'MC AIO %',data:[avg(ones,'mc_aio_rate'),avg(twos,'mc_aio_rate')],backgroundColor:[C.aio+'CC',C.aio+'88'],borderRadius:6},
+      {label:'MC Organic %',data:[avg(ones,'mc_organic_rate'),avg(twos,'mc_organic_rate')],backgroundColor:[C.org+'CC',C.org+'88'],borderRadius:6},
+      {label:'MC Ads %',data:[avg(ones,'mc_ads_rate'),avg(twos,'mc_ads_rate')],backgroundColor:[C.ads+'CC',C.ads+'88'],borderRadius:6},
+    ]},
+    options:{...bo(100),plugins:{...bo(100).plugins,legend:{display:true,labels:{color:'#94A3B8',font:{size:11}}}}}
+  });
+
+  const comps=[
+    {k:'brevo_aio_rate',l:'Brevo',c:C.brevo},
+    {k:'klaviyo_aio_rate',l:'Klaviyo',c:C.kl},
+    {k:'mailerlite_aio_rate',l:'MailerLite',c:C.ml},
+    {k:'omnisend_aio_rate',l:'Omnisend',c:C.om},
+  ];
+  dc('c11');CH.c11=new Chart(document.getElementById('c11'),{
+    type:'bar',
+    data:{
+      labels:comps.map(c=>c.l),
+      datasets:[
+        {label:'1-gram',data:comps.map(c=>avg(ones,c.k)),backgroundColor:comps.map(c=>c.c+'CC'),borderRadius:6},
+        {label:'2-gram',data:comps.map(c=>avg(twos,c.k)),backgroundColor:comps.map(c=>c.c+'55'),borderRadius:6,borderWidth:1,borderColor:comps.map(c=>c.c)},
+      ]
+    },
+    options:{...bo(40),plugins:{...bo(40).plugins,legend:{display:true,labels:{color:'#94A3B8',font:{size:11}}}}}
+  });
+}
+
+// ── MAIN LOAD ────────────────────────────────────────────────
 async function loadData(){
   document.getElementById('loading').style.display='flex';
   document.getElementById('dash').style.display='none';
-  let rows=null,live=false;
+  let rows=null,live=false,rawRows=[];
+
   try{
-    const res=await fetch('https://docs.google.com/spreadsheets/d/'+SID+'/gviz/tq?tqx=out:json&gid='+GID);
-    if(res.ok){
-      const txt=await res.text();
-      const json=JSON.parse(txt.replace(/^[^\(]+\(/,'').replace(/\);?\s*$/,''));
-      const cols=json.table.cols.map(c=>c.label);
-      const all=json.table.rows.filter(r=>r&&r.c&&r.c[0]&&r.c[0].v).map(row=>{const o={};cols.forEach((c,i)=>{const cell=row.c[i];if(!cell||cell.v==null){o[c]='';return;}const v=cell.v;if(typeof v==='string'&&v.match(/^Date\((\d+),(\d+),(\d+)\)$/)){const m=v.match(/^Date\((\d+),(\d+),(\d+)\)$/);o[c]=m[1]+'-'+String(parseInt(m[2])+1).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0');}else{o[c]=v;}});return o;});
-      const act=all.filter(r=>parseFloat(r.aio_presence_rate)>0);
-      if(act.length>0){rows=act;live=true;}
-    }
-  }catch(e){}
+    const [sumData,ngramData]=await Promise.all([fetchGviz(GID_SUMMARY),fetchGviz(GID_NGRAM)]);
+    const act=sumData.filter(r=>parseFloat(r.aio_presence_rate)>0);
+    if(act.length>0){rows=act;live=true;}
+    rawRows=ngramData;
+  }catch(e){console.warn('live fetch failed:',e);}
+
   if(!rows)rows=FB;
+  ngData=buildNgram(rawRows.length?rawRows:[]);
+
   build(rows,live);
+  if(ngData.length)ngRender();
+
   document.getElementById('loading').style.display='none';
   document.getElementById('dash').style.display='block';
   const lat=rows[rows.length-1];
@@ -149,8 +384,9 @@ async function loadData(){
   document.getElementById('lupd').textContent='Last run: '+fmt(lat.run_date);
   document.getElementById('hsub').textContent='Google AI Overview tracking · '+fmt(rows[0].run_date)+' – '+fmt(lat.run_date)+' · '+rows.length+' active scan dates';
   document.getElementById('fl').textContent='Data: Mailchimp AIO Tool · '+(live?'Live from Google Sheets':'Cached — upload to GitHub Pages for live data')+' · '+rows.reduce((s,r)=>s+r.total,0).toLocaleString()+' keyword scans';
-  document.getElementById('fr').textContent=rows.length+' active dates shown';
+  document.getElementById('fr').textContent=rows.length+' active dates shown'+(ngData.length?' · '+ngData.length+' keywords (1+2-gram)':'');
 }
+
 function build(rows,live){
   const dates=rows.map(r=>fmt(r.run_date)),lat=rows[rows.length-1],prev=rows[rows.length-2]||{};
   const kpis=[
@@ -207,7 +443,7 @@ function build(rows,live){
     {l:'Trend direction',d:'overall',v:av[av.length-1]<av[0]?'↓ Declining':'↑ Increasing',c:'#4ADE80'},
   ].map(s=>'<div class="sr"><div><div class="srl">'+s.l+'</div><div class="srd">'+s.d+'</div></div><div class="srv" style="color:'+s.c+'">'+s.v+'</div></div>').join('');
 }
-function st(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');el.classList.add('active');}
+function st(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');el.classList.add('active');if(id==='ngram'&&ngData.length)ngRender();}
 loadData();
 </script>
 </body>
