@@ -107,7 +107,7 @@ h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#F8
     <button class="tab" onclick="st('mailchimp',this)">Mailchimp Rankings</button>
     <button class="tab" onclick="st('competitors',this)">Competitor AIO Share</button>
     <button class="tab" onclick="st('ads',this)">Ads vs AIO</button>
-    <button class="tab" onclick="st('ngram',this)">Keyword N-gram</button>
+    <button class="tab" onclick="st('ngram',this)">Keyword Performance</button>
   </div>
 
   <!-- OVERVIEW -->
@@ -147,15 +147,9 @@ h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#F8
   <!-- NGRAM -->
   <div id="panel-ngram" class="panel">
     <div class="cc">
-      <div class="stitle"><div class="bar" style="background:var(--org)"></div><span>Keyword Performance by N-gram</span></div>
-      <p class="cdesc">Aggregated metrics for each keyword grouped by 1-gram (single word) and 2-gram (two words). Based on the most recent scan date. Click any column header to sort.</p>
+      <div class="stitle"><div class="bar" style="background:var(--org)"></div><span>Keyword Performance</span></div>
+      <p class="cdesc">Performance metrics for every tracked keyword averaged across all scan dates. Click any column header to sort.</p>
       <div class="ng-controls">
-        <button class="ng-btn active" id="ng-all" onclick="ngFilter('all',this)">All</button>
-        <button class="ng-btn" id="ng-1" onclick="ngFilter('1',this)">1-gram</button>
-        <button class="ng-btn" id="ng-2" onclick="ngFilter('2',this)">2-gram</button>
-        <select class="ng-select" id="ng-date-sel" onchange="ngRender()">
-          <option value="latest">Latest date</option>
-        </select>
         <input class="ng-search" id="ng-search" placeholder="Search keywords..." oninput="ngRender()">
         <span style="font-size:11px;color:var(--mut);margin-left:auto" id="ng-count"></span>
       </div>
@@ -164,7 +158,6 @@ h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#F8
           <thead>
             <tr>
               <th onclick="ngSort('keyword')" id="th-keyword">Keyword <span class="sort-arrow">↕</span></th>
-              <th onclick="ngSort('n')" id="th-n">N <span class="sort-arrow">↕</span></th>
               <th onclick="ngSort('aio_showing')" id="th-aio_showing">AIO Showing <span class="sort-arrow">↕</span></th>
               <th onclick="ngSort('mc_aio_rate')" id="th-mc_aio_rate" class="sorted">MC AIO % <span class="sort-arrow">↓</span></th>
               <th onclick="ngSort('mc_aio_rank')" id="th-mc_aio_rank">MC AIO Rank <span class="sort-arrow">↕</span></th>
@@ -267,13 +260,6 @@ function buildNgram(ngramRows){
   }));
 }
 
-function ngFilter(f,el){
-  ngFilter_=f;
-  document.querySelectorAll('.ng-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  ngRender();
-}
-
 function ngSort(key){
   if(ngSortKey===key){ngSortDir*=-1;}else{ngSortKey=key;ngSortDir=-1;}
   document.querySelectorAll('.ng-tbl th').forEach(th=>{
@@ -289,8 +275,6 @@ function ngRender(){
   if(!ngData.length)return;
   const search=(document.getElementById('ng-search').value||'').toLowerCase();
   let rows=ngData.filter(r=>{
-    if(ngFilter_==='1'&&r.n!==1)return false;
-    if(ngFilter_==='2'&&r.n!==2)return false;
     if(search&&!r.keyword.includes(search))return false;
     return true;
   });
@@ -307,8 +291,7 @@ function ngRender(){
   const rank=v=>v==null?'<td class="num na">—</td>':'<td class="num">#'+v.toFixed(2)+'</td>';
   document.getElementById('ng-tbody').innerHTML=rows.map(r=>`
     <tr>
-      <td class="kw">${r.keyword}<span class="ng-pill ${r.n===1?'one':'two'}">${r.n}-gram</span></td>
-      <td class="num">${r.n}</td>
+      <td class="kw">${r.keyword}</td>
       ${pct(r.aio_showing)}
       ${pct(r.mc_aio_rate)}
       ${rank(r.mc_aio_rank)}
