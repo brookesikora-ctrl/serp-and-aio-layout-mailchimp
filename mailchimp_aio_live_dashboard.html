@@ -171,6 +171,25 @@ h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#F8
       <div class="cw lg"><canvas id="ck3"></canvas></div>
     </div>
 
+    <!-- Scatter plot -->
+    <div class="cc">
+      <div class="stitle"><div class="bar" style="background:var(--aio)"></div><span>Keyword Cluster Map — MC AIO % vs MC Organic %</span></div>
+      <p class="cdesc">Each dot is a keyword. Horizontal = Mailchimp AIO citation rate. Vertical = Mailchimp organic citation rate. Dot size = AIO presence rate (how often Google shows an AI Overview for that keyword — bigger = higher stakes).</p>
+      <div class="cw" style="height:480px;position:relative">
+        <canvas id="ck-scatter"></canvas>
+        <!-- Quadrant labels -->
+        <div style="position:absolute;top:8px;left:55%;font-size:10px;color:rgba(56,189,248,0.5);font-weight:600;pointer-events:none">HIGH AIO + HIGH ORGANIC →</div>
+        <div style="position:absolute;top:8px;left:8%;font-size:10px;color:rgba(192,132,252,0.5);font-weight:600;pointer-events:none">← LOW AIO + HIGH ORGANIC</div>
+        <div style="position:absolute;bottom:32px;left:55%;font-size:10px;color:rgba(251,146,60,0.5);font-weight:600;pointer-events:none">AIO ONLY →</div>
+        <div style="position:absolute;bottom:32px;left:8%;font-size:10px;color:rgba(100,116,139,0.5);font-weight:600;pointer-events:none">← LOW VISIBILITY</div>
+      </div>
+      <div class="leg" style="margin-top:14px;">
+        <div class="li"><div class="ld" style="background:var(--mc);border-radius:50%"></div>High MC AIO presence</div>
+        <div class="li"><div class="ld" style="background:var(--org);border-radius:50%"></div>High MC organic presence</div>
+        <div class="li" style="font-size:11px;color:var(--mut)">Dot size = AIO presence rate (bigger = Google shows AIO more often)</div>
+      </div>
+    </div>
+
     <!-- Full keyword table -->
     <div class="cc">
       <div class="stitle"><div class="bar" style="background:var(--org)"></div><span>All Keywords</span></div>
@@ -398,9 +417,69 @@ function ngRender(){
     },
     options:{...gapOpts,plugins:{...gapOpts.plugins,legend:{display:true,labels:{color:'#94A3B8',font:{size:11}}}}}
   });
-}
 
-// ── MAIN LOAD ────────────────────────────────────────────────
+  // ── Scatter plot ─────────────────────────────────────────
+  const maxAio=Math.max(...ngData.map(r=>r.aio_showing||1));
+  const scatterDots=ngData.map(r=>({
+    x:r.mc_aio_rate,
+    y:r.mc_organic_rate,
+    r:Math.max(4,Math.round((r.aio_showing/maxAio)*18)),
+    keyword:r.keyword,
+    aio:r.mc_aio_rate,
+    org:r.mc_organic_rate,
+    aio_showing:r.aio_showing,
+  }));
+  const dotColors=scatterDots.map(d=>{
+    if(d.x>=10&&d.y>=10) return C.org+'CC';
+    if(d.x<10&&d.y>=10)  return C.aio+'CC';
+    if(d.x>=10&&d.y<10)  return C.ads+'CC';
+    return C.muted+'88';
+  });
+  const midX=parseFloat((ngData.reduce((s,r)=>s+r.mc_aio_rate,0)/ngData.length).toFixed(1));
+  const midY=parseFloat((ngData.reduce((s,r)=>s+r.mc_organic_rate,0)/ngData.length).toFixed(1));
+  dc('ck-scatter');CH['ck-scatter']=new Chart(document.getElementById('ck-scatter'),{
+    type:'bubble',
+    data:{datasets:[{
+      label:'Keywords',
+      data:scatterDots,
+      backgroundColor:dotColors,
+      borderColor:dotColors.map(c=>c.replace('CC','FF')),
+      borderWidth:0.5,
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#0F1729',borderColor:'rgba(255,255,255,0.15)',borderWidth:1,
+          titleColor:'#FFE01B',bodyColor:'#E2E8F0',padding:10,
+          callbacks:{
+            title:ctx=>ctx[0].raw.keyword,
+            label:ctx=>[
+              'MC AIO: '+ctx.raw.aio.toFixed(1)+'%',
+              'MC Organic: '+ctx.raw.org.toFixed(1)+'%',
+              'AIO Presence: '+ctx.raw.aio_showing.toFixed(1)+'%',
+            ]
+          }
+        }
+      },
+      scales:{
+        x:{
+          title:{display:true,text:'Mailchimp AIO Citation Rate (%)',color:'#64748B',font:{size:11}},
+          grid:{color:'rgba(255,255,255,0.06)'},
+          ticks:{color:'#64748B',font:{size:10},callback:v=>v+'%'},
+          min:0,
+        },
+        y:{
+          title:{display:true,text:'Mailchimp Organic Citation Rate (%)',color:'#64748B',font:{size:11}},
+          grid:{color:'rgba(255,255,255,0.06)'},
+          ticks:{color:'#64748B',font:{size:10},callback:v=>v+'%'},
+          min:0,
+        }
+      }
+    }
+  });
+}
 async function loadData(){
   document.getElementById('loading').style.display='flex';
   document.getElementById('dash').style.display='none';
