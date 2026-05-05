@@ -241,7 +241,7 @@ async function fetchGviz(gid){
 let ngData=[], ngFilter_='all', ngSortKey='mc_aio_rate', ngSortDir=-1;
 
 function buildNgram(ngramRows){
-  return ngramRows.filter(r=>r.keyword&&(parseInt(r.ngram)===1||parseInt(r.ngram)===2)).map(r=>({
+  return ngramRows.filter(r=>r.keyword).map(r=>({
     keyword:String(r.keyword),
     n:parseInt(r.ngram)||1,
     aio_showing:parseFloat(r.aio_showing_rate)||0,
