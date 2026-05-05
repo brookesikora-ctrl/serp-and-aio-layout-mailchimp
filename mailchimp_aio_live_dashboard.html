@@ -144,11 +144,37 @@ h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#F8
     </div>
   </div>
 
-  <!-- NGRAM -->
+  <!-- KEYWORD PERFORMANCE -->
   <div id="panel-ngram" class="panel">
+
+    <!-- KPI summary row -->
+    <div class="kgrid" id="kw-kpis" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:20px;"></div>
+
+    <!-- Top charts row -->
+    <div class="tcol" style="margin-bottom:20px;">
+      <div class="cc" style="margin-bottom:0">
+        <div class="stitle"><div class="bar" style="background:var(--mc)"></div><span>Top 20 Keywords — Mailchimp AIO Citation</span></div>
+        <p class="cdesc">Keywords where Mailchimp is most frequently cited in AI Overviews.</p>
+        <div class="cw xl"><canvas id="ck1"></canvas></div>
+      </div>
+      <div class="cc" style="margin-bottom:0">
+        <div class="stitle"><div class="bar" style="background:var(--dan)"></div><span>Top 20 Missed Opportunities</span></div>
+        <p class="cdesc">Keywords with high AIO presence but Mailchimp not cited — biggest visibility gaps.</p>
+        <div class="cw xl"><canvas id="ck2"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Competitor gap chart -->
     <div class="cc">
-      <div class="stitle"><div class="bar" style="background:var(--org)"></div><span>Keyword Performance</span></div>
-      <p class="cdesc">Performance metrics for every tracked keyword averaged across all scan dates. Click any column header to sort.</p>
+      <div class="stitle"><div class="bar" style="background:var(--brevo)"></div><span>Top 20 Keywords — Competitors Outranking Mailchimp in AIO</span></div>
+      <p class="cdesc">Keywords where the top competitor's AIO citation rate exceeds Mailchimp's by the largest margin.</p>
+      <div class="cw lg"><canvas id="ck3"></canvas></div>
+    </div>
+
+    <!-- Full keyword table -->
+    <div class="cc">
+      <div class="stitle"><div class="bar" style="background:var(--org)"></div><span>All Keywords</span></div>
+      <p class="cdesc">Full keyword performance table averaged across all scan dates. Click any column header to sort.</p>
       <div class="ng-controls">
         <input class="ng-search" id="ng-search" placeholder="Search keywords..." oninput="ngRender()">
         <span style="font-size:11px;color:var(--mut);margin-left:auto" id="ng-count"></span>
@@ -158,36 +184,22 @@ h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#F8
           <thead>
             <tr>
               <th onclick="ngSort('keyword')" id="th-keyword">Keyword <span class="sort-arrow">↕</span></th>
-              <th onclick="ngSort('aio_showing')" id="th-aio_showing">AIO Showing <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('aio_showing')" id="th-aio_showing">AIO % <span class="sort-arrow">↕</span></th>
               <th onclick="ngSort('mc_aio_rate')" id="th-mc_aio_rate" class="sorted">MC AIO % <span class="sort-arrow">↓</span></th>
               <th onclick="ngSort('mc_aio_rank')" id="th-mc_aio_rank">MC AIO Rank <span class="sort-arrow">↕</span></th>
               <th onclick="ngSort('mc_organic_rate')" id="th-mc_organic_rate">MC Organic % <span class="sort-arrow">↕</span></th>
               <th onclick="ngSort('mc_organic_rank')" id="th-mc_organic_rank">MC Org Rank <span class="sort-arrow">↕</span></th>
               <th onclick="ngSort('mc_ads_rate')" id="th-mc_ads_rate">MC Ads % <span class="sort-arrow">↕</span></th>
-              <th onclick="ngSort('brevo_aio_rate')" id="th-brevo_aio_rate">Brevo AIO % <span class="sort-arrow">↕</span></th>
-              <th onclick="ngSort('klaviyo_aio_rate')" id="th-klaviyo_aio_rate">Klaviyo AIO % <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('brevo_aio_rate')" id="th-brevo_aio_rate">Brevo % <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('klaviyo_aio_rate')" id="th-klaviyo_aio_rate">Klaviyo % <span class="sort-arrow">↕</span></th>
               <th onclick="ngSort('mailerlite_aio_rate')" id="th-mailerlite_aio_rate">MailerLite % <span class="sort-arrow">↕</span></th>
               <th onclick="ngSort('omnisend_aio_rate')" id="th-omnisend_aio_rate">Omnisend % <span class="sort-arrow">↕</span></th>
-              <th onclick="ngSort('ads_above_aio')" id="th-ads_above_aio">Ads Above AIO <span class="sort-arrow">↕</span></th>
+              <th onclick="ngSort('ads_above_aio')" id="th-ads_above_aio">Ads Above AIO % <span class="sort-arrow">↕</span></th>
               <th onclick="ngSort('top_organic_1')" id="th-top_organic_1">Top Organic #1 <span class="sort-arrow">↕</span></th>
             </tr>
           </thead>
           <tbody id="ng-tbody"></tbody>
         </table>
-      </div>
-    </div>
-
-    <!-- N-gram summary cards -->
-    <div class="tcol" style="margin-top:0">
-      <div class="cc" style="margin-bottom:0">
-        <div class="stitle"><div class="bar" style="background:var(--org)"></div><span>1-gram vs 2-gram — AIO Citation Rate</span></div>
-        <p class="cdesc">How Mailchimp's AIO presence compares across single-word vs two-word keywords.</p>
-        <div class="cw"><canvas id="c10"></canvas></div>
-      </div>
-      <div class="cc" style="margin-bottom:0">
-        <div class="stitle"><div class="bar" style="background:var(--aio)"></div><span>Competitor AIO by N-gram (Latest)</span></div>
-        <p class="cdesc">Average AIO citation rate per competitor broken down by ngram type.</p>
-        <div class="cw"><canvas id="c11"></canvas></div>
       </div>
     </div>
   </div>
@@ -306,37 +318,85 @@ function ngRender(){
       <td class="kw" style="font-size:11px;color:var(--mut)">${r.top_organic_1||'—'}</td>
     </tr>`).join('');
 
-  // Summary charts
-  const ones=ngData.filter(r=>r.n===1);
-  const twos=ngData.filter(r=>r.n===2);
-  const avg=(arr,k)=>arr.length?parseFloat((arr.reduce((s,r)=>s+(r[k]||0),0)/arr.length).toFixed(1)):0;
+  // ── KPI summary ──────────────────────────────────────────
+  const all=ngData;
+  const cited=all.filter(r=>r.mc_aio_rate>0).length;
+  const missed=all.filter(r=>r.aio_showing>50&&r.mc_aio_rate===0).length;
+  const topComp=r=>Math.max(r.brevo_aio_rate,r.klaviyo_aio_rate,r.mailerlite_aio_rate,r.omnisend_aio_rate);
+  const losing=all.filter(r=>topComp(r)>r.mc_aio_rate).length;
+  const avgMcAio=parseFloat((all.reduce((s,r)=>s+r.mc_aio_rate,0)/all.length).toFixed(1));
+  document.getElementById('kw-kpis').innerHTML=[
+    {l:'Keywords Tracked',v:all.length,c:C.aio,s:'total tracked keywords',unit:''},
+    {l:'MC AIO Avg Rate',v:avgMcAio,c:C.mc,s:'avg citation rate across keywords',unit:'%'},
+    {l:'Keywords MC Cited',v:cited,c:'#4ADE80',s:'keywords where MC appears in AIO',unit:''},
+    {l:'Missed Opportunities',v:missed,c:C.dan,s:'high AIO presence, MC not cited',unit:''},
+    {l:'Losing to Competitor',v:losing,c:C.ads,s:'keywords where a competitor leads MC',unit:''},
+  ].map(k=>`<div class="kcard"><div class="kbar" style="background:${k.c}"></div><div class="klbl">${k.l}</div><div class="kval" style="color:${k.c}">${k.v}${k.unit}</div><div class="ksub">${k.s}</div></div>`).join('');
 
-  dc('c10');CH.c10=new Chart(document.getElementById('c10'),{
-    type:'bar',
-    data:{labels:['1-gram','2-gram'],datasets:[
-      {label:'MC AIO %',data:[avg(ones,'mc_aio_rate'),avg(twos,'mc_aio_rate')],backgroundColor:[C.aio+'CC',C.aio+'88'],borderRadius:6},
-      {label:'MC Organic %',data:[avg(ones,'mc_organic_rate'),avg(twos,'mc_organic_rate')],backgroundColor:[C.org+'CC',C.org+'88'],borderRadius:6},
-      {label:'MC Ads %',data:[avg(ones,'mc_ads_rate'),avg(twos,'mc_ads_rate')],backgroundColor:[C.ads+'CC',C.ads+'88'],borderRadius:6},
-    ]},
-    options:{...bo(100),plugins:{...bo(100).plugins,legend:{display:true,labels:{color:'#94A3B8',font:{size:11}}}}}
+  // ── Chart 1: Top 20 MC AIO keywords ──────────────────────
+  const top20mc=[...ngData].sort((a,b)=>b.mc_aio_rate-a.mc_aio_rate).slice(0,20);
+  const hbo=(max)=>({
+    responsive:true,maintainAspectRatio:false,
+    indexAxis:'y',
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#0F1729',borderColor:'rgba(255,255,255,0.15)',borderWidth:1,titleColor:'#94A3B8',bodyColor:'#E2E8F0',padding:10,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.x.toFixed(1)}%`}}},
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'#64748B',font:{size:10},callback:v=>v+'%'},min:0,...(max?{max}:{})},
+      y:{grid:{display:false},ticks:{color:'#CBD5E1',font:{size:10}}}
+    }
   });
-
-  const comps=[
-    {k:'brevo_aio_rate',l:'Brevo',c:C.brevo},
-    {k:'klaviyo_aio_rate',l:'Klaviyo',c:C.kl},
-    {k:'mailerlite_aio_rate',l:'MailerLite',c:C.ml},
-    {k:'omnisend_aio_rate',l:'Omnisend',c:C.om},
-  ];
-  dc('c11');CH.c11=new Chart(document.getElementById('c11'),{
+  dc('ck1');CH.ck1=new Chart(document.getElementById('ck1'),{
     type:'bar',
     data:{
-      labels:comps.map(c=>c.l),
+      labels:top20mc.map(r=>r.keyword),
       datasets:[
-        {label:'1-gram',data:comps.map(c=>avg(ones,c.k)),backgroundColor:comps.map(c=>c.c+'CC'),borderRadius:6},
-        {label:'2-gram',data:comps.map(c=>avg(twos,c.k)),backgroundColor:comps.map(c=>c.c+'55'),borderRadius:6,borderWidth:1,borderColor:comps.map(c=>c.c)},
+        {label:'MC AIO %',data:top20mc.map(r=>r.mc_aio_rate),backgroundColor:C.mc+'CC',borderRadius:4},
+        {label:'MC Organic %',data:top20mc.map(r=>r.mc_organic_rate),backgroundColor:C.org+'88',borderRadius:4},
       ]
     },
-    options:{...bo(40),plugins:{...bo(40).plugins,legend:{display:true,labels:{color:'#94A3B8',font:{size:11}}}}}
+    options:{...hbo(100),plugins:{...hbo(100).plugins,legend:{display:true,labels:{color:'#94A3B8',font:{size:11}}}}}
+  });
+
+  // ── Chart 2: Top 20 missed opportunities ─────────────────
+  const missed20=[...ngData]
+    .filter(r=>r.aio_showing>0)
+    .sort((a,b)=>(b.aio_showing-b.mc_aio_rate)-(a.aio_showing-a.mc_aio_rate))
+    .slice(0,20);
+  dc('ck2');CH.ck2=new Chart(document.getElementById('ck2'),{
+    type:'bar',
+    data:{
+      labels:missed20.map(r=>r.keyword),
+      datasets:[
+        {label:'AIO Presence %',data:missed20.map(r=>r.aio_showing),backgroundColor:C.aio+'55',borderRadius:4},
+        {label:'MC AIO %',data:missed20.map(r=>r.mc_aio_rate),backgroundColor:C.dan+'CC',borderRadius:4},
+      ]
+    },
+    options:{...hbo(100),plugins:{...hbo(100).plugins,legend:{display:true,labels:{color:'#94A3B8',font:{size:11}}}}}
+  });
+
+  // ── Chart 3: Top 20 competitor gap keywords ───────────────
+  const withGap=ngData.map(r=>{
+    const best=Math.max(r.brevo_aio_rate,r.klaviyo_aio_rate,r.mailerlite_aio_rate,r.omnisend_aio_rate);
+    const bestName=['Brevo','Klaviyo','MailerLite','Omnisend'][[r.brevo_aio_rate,r.klaviyo_aio_rate,r.mailerlite_aio_rate,r.omnisend_aio_rate].indexOf(best)];
+    return{...r,best,bestName,gap:parseFloat((best-r.mc_aio_rate).toFixed(1))};
+  }).filter(r=>r.gap>0).sort((a,b)=>b.gap-a.gap).slice(0,20);
+
+  const gapOpts=hbo(100);
+  gapOpts.plugins.tooltip.callbacks.label=ctx=>{
+    const r=withGap[ctx.dataIndex];
+    if(ctx.datasetIndex===0)return` MC AIO: ${r.mc_aio_rate.toFixed(1)}%`;
+    return` ${r.bestName}: ${r.best.toFixed(1)}% (gap: +${r.gap.toFixed(1)}pp)`;
+  };
+  dc('ck3');CH.ck3=new Chart(document.getElementById('ck3'),{
+    type:'bar',
+    data:{
+      labels:withGap.map(r=>r.keyword),
+      datasets:[
+        {label:'Mailchimp AIO %',data:withGap.map(r=>r.mc_aio_rate),backgroundColor:C.mc+'CC',borderRadius:4},
+        {label:'Top Competitor %',data:withGap.map(r=>r.best),backgroundColor:C.dan+'CC',borderRadius:4},
+      ]
+    },
+    options:{...gapOpts,plugins:{...gapOpts.plugins,legend:{display:true,labels:{color:'#94A3B8',font:{size:11}}}}}
   });
 }
 
